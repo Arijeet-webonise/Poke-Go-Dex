@@ -8,9 +8,9 @@ func (app *App) InitRouter() {
 func initialiseV1API(app *App) {
 	//REST API
 	app.Router.Get("/api/ping", app.handle(app.ping))
-	app.Router.Get("/api/todo/", app.handle(app.GetAllTodos))
+	// app.Router.Get("/api/todo/", app.handle(app.GetAllTodos))
 	//VIEW
 	app.Router.Get("/", app.renderView(app.RenderIndex))
-	app.Router.Get("/todo/", app.renderView(app.DisplayTodos))
-
+	app.Router.Get("/pokemon/Generate", app.renderView(app.GenerateNewPokemon))
+	app.Router.Get("/pokemon/", app.renderView(app.DisplayPokemons))
 }
