@@ -1,13 +1,23 @@
 package app
 
 import (
+	"encoding/json"
 	"errors"
 	"io"
+	"io/ioutil"
 	"net/http"
+	"reflect"
 
 	"github.com/Arijeet-webonise/Poke-Go-Dex/app/models"
 	"github.com/Arijeet-webonise/Poke-Go-Dex/pkg/framework"
 )
+
+type Pokemon struct {
+	Poke    models.Pokemon
+	Ability []string
+	Stats   []string
+	Types   []string
+}
 
 func (a App) GetAllPokemon(w *framework.Response, r *framework.Request) {
 
@@ -25,9 +35,53 @@ func (a App) GetAllPokemon(w *framework.Response, r *framework.Request) {
 	w.PutInData("Pokemons", pokemons)
 }
 
+type Result struct {
+	Url  string `json: url`
+	name string `json: name`
+}
+
+type PokemonList struct {
+	Count    int      `json: count`
+	Previous string   `json: previous`
+	Next     string   `json: next`
+	Results  []Result `json: results`
+}
+
+func CreatePokemon(pokemonUrl string, app *App) {
+	resp, err := http.Get(pokemonUrl)
+	jsonResp := make(map[string]interface{}, 0)
+	if err != nil {
+		app.Log.Info(err)
+	}
+
+	bytes, _ := ioutil.ReadAll(resp.Body)
+
+	json.Unmarshal(bytes, &jsonResp)
+
+	app.Log.Info(reflect.TypeOf(jsonResp["game_indices"]))
+
+	for _, indexes := range jsonResp["game_indices"] {
+
+	}
+}
+
 func (app *App) GenerateNewPokemon(w http.ResponseWriter, r *http.Request) {
-	tmplList := []string{"./web/views/base.html",
-		"./web/views/pokemon/generate.html"}
+	tmplList := []string{"../../web/views/base.html",
+		"../../web/views/pokemon/generate.html"}
+
+	resp, err := http.Get("https://pokeapi.co/api/v2/pokemon")
+	if err != nil {
+		app.Log.Info(err)
+	}
+	var pokemons PokemonList
+
+	bytes, _ := ioutil.ReadAll(resp.Body)
+	json.Unmarshal(bytes, &pokemons)
+
+	for _, pokemon := range pokemons.Results {
+		CreatePokemon(pokemon.Url, app)
+		break
+	}
 
 	res, err := app.TplParser.ParseTemplate(tmplList, nil)
 	if err != nil {
@@ -38,13 +92,16 @@ func (app *App) GenerateNewPokemon(w http.ResponseWriter, r *http.Request) {
 
 //RenderIndex renders the index page
 func (app *App) DisplayPokemons(w http.ResponseWriter, r *http.Request) {
-	pokemons, err := models.GetAllPokemons(app.DB)
-	tmplList := []string{"./web/views/base.html",
-		"./web/views/todos/todo.html"}
+	pokemons, _ := models.GetPokemons(app.DB)
+	tmplList := []string{"../../web/views/base.html",
+		"../../web/views/pokemon/pokemons.html"}
+
 	data := struct {
-		Pokemon []*models.Pokemon
+		Pokemon []*models.PokemonPage
 	}{pokemons}
+
 	res, err := app.TplParser.ParseTemplate(tmplList, data)
+
 	if err != nil {
 		app.Log.Info(err)
 	}

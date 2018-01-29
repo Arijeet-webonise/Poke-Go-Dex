@@ -11,6 +11,6 @@ func initialiseV1API(app *App) {
 	// app.Router.Get("/api/todo/", app.handle(app.GetAllTodos))
 	//VIEW
 	app.Router.Get("/", app.renderView(app.RenderIndex))
-	app.Router.Get("/pokemon/Generate", app.renderView(app.GenerateNewPokemon))
-	app.Router.Get("/pokemon/", app.renderView(app.DisplayPokemons))
+	app.Router.Get("/pokemon/generate", app.renderView(app.GenerateNewPokemon))
+	app.Router.Get("/pokemon", app.renderView(app.DisplayPokemons))
 }

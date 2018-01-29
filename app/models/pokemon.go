@@ -10,19 +10,15 @@ import (
 
 // Pokemon represents a row from 'public.pokemon'.
 type Pokemon struct {
-	ID                     int             `json:"id"`                       // id
-	Name                   sql.NullString  `json:"name"`                     // name
-	BaseExperience         sql.NullFloat64 `json:"base_experience"`          // base_experience
-	Height                 sql.NullFloat64 `json:"height"`                   // height
-	IsDefault              sql.NullBool    `json:"is_default"`               // is_default
-	Weight                 sql.NullFloat64 `json:"weight"`                   // weight
-	Ability                sql.NullString  `json:"ability"`                  // ability
-	Forms                  sql.NullString  `json:"forms"`                    // forms
-	GameIndices            sql.NullString  `json:"game_indices"`             // game_indices
-	HeldItems              sql.NullString  `json:"held_items"`               // held_items
-	LocationAreaEncounters sql.NullString  `json:"location_area_encounters"` // location_area_encounters
-	Stats                  sql.NullString  `json:"stats"`                    // stats
-	Types                  sql.NullString  `json:"types"`                    // types
+	ID             int             `json:"id"`              // id
+	Name           sql.NullString  `json:"name"`            // name
+	BaseExperience sql.NullFloat64 `json:"base_experience"` // base_experience
+	Height         sql.NullFloat64 `json:"height"`          // height
+	IsDefault      sql.NullBool    `json:"is_default"`      // is_default
+	Weight         sql.NullFloat64 `json:"weight"`          // weight
+	Ability        sql.NullString  `json:"ability"`         // ability
+	Stats          int             `json:"stats"`           // stats
+	Types          sql.NullString  `json:"types"`           // types
 
 	// xo fields
 	_exists, _deleted bool
@@ -49,14 +45,14 @@ func (p *Pokemon) Insert(db XODB) error {
 
 	// sql insert query, primary key must be provided
 	const sqlstr = `INSERT INTO public.pokemon (` +
-		`id, name, base_experience, height, is_default, weight, ability, forms, game_indices, held_items, location_area_encounters, stats, types` +
+		`id, name, base_experience, height, is_default, weight, ability, stats, types` +
 		`) VALUES (` +
-		`$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13` +
+		`$1, $2, $3, $4, $5, $6, $7, $8, $9` +
 		`)`
 
 	// run query
-	XOLog(sqlstr, p.ID, p.Name, p.BaseExperience, p.Height, p.IsDefault, p.Weight, p.Ability, p.Forms, p.GameIndices, p.HeldItems, p.LocationAreaEncounters, p.Stats, p.Types)
-	err = db.QueryRow(sqlstr, p.ID, p.Name, p.BaseExperience, p.Height, p.IsDefault, p.Weight, p.Ability, p.Forms, p.GameIndices, p.HeldItems, p.LocationAreaEncounters, p.Stats, p.Types).Scan(&p.ID)
+	XOLog(sqlstr, p.ID, p.Name, p.BaseExperience, p.Height, p.IsDefault, p.Weight, p.Ability, p.Stats, p.Types)
+	err = db.QueryRow(sqlstr, p.ID, p.Name, p.BaseExperience, p.Height, p.IsDefault, p.Weight, p.Ability, p.Stats, p.Types).Scan(&p.ID)
 	if err != nil {
 		return err
 	}
@@ -83,14 +79,14 @@ func (p *Pokemon) Update(db XODB) error {
 
 	// sql query
 	const sqlstr = `UPDATE public.pokemon SET (` +
-		`name, base_experience, height, is_default, weight, ability, forms, game_indices, held_items, location_area_encounters, stats, types` +
+		`name, base_experience, height, is_default, weight, ability, stats, types` +
 		`) = ( ` +
-		`$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12` +
-		`) WHERE id = $13`
+		`$1, $2, $3, $4, $5, $6, $7, $8` +
+		`) WHERE id = $9`
 
 	// run query
-	XOLog(sqlstr, p.Name, p.BaseExperience, p.Height, p.IsDefault, p.Weight, p.Ability, p.Forms, p.GameIndices, p.HeldItems, p.LocationAreaEncounters, p.Stats, p.Types, p.ID)
-	_, err = db.Exec(sqlstr, p.Name, p.BaseExperience, p.Height, p.IsDefault, p.Weight, p.Ability, p.Forms, p.GameIndices, p.HeldItems, p.LocationAreaEncounters, p.Stats, p.Types, p.ID)
+	XOLog(sqlstr, p.Name, p.BaseExperience, p.Height, p.IsDefault, p.Weight, p.Ability, p.Stats, p.Types, p.ID)
+	_, err = db.Exec(sqlstr, p.Name, p.BaseExperience, p.Height, p.IsDefault, p.Weight, p.Ability, p.Stats, p.Types, p.ID)
 	return err
 }
 
@@ -116,18 +112,18 @@ func (p *Pokemon) Upsert(db XODB) error {
 
 	// sql query
 	const sqlstr = `INSERT INTO public.pokemon (` +
-		`id, name, base_experience, height, is_default, weight, ability, forms, game_indices, held_items, location_area_encounters, stats, types` +
+		`id, name, base_experience, height, is_default, weight, ability, stats, types` +
 		`) VALUES (` +
-		`$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13` +
+		`$1, $2, $3, $4, $5, $6, $7, $8, $9` +
 		`) ON CONFLICT (id) DO UPDATE SET (` +
-		`id, name, base_experience, height, is_default, weight, ability, forms, game_indices, held_items, location_area_encounters, stats, types` +
+		`id, name, base_experience, height, is_default, weight, ability, stats, types` +
 		`) = (` +
-		`EXCLUDED.id, EXCLUDED.name, EXCLUDED.base_experience, EXCLUDED.height, EXCLUDED.is_default, EXCLUDED.weight, EXCLUDED.ability, EXCLUDED.forms, EXCLUDED.game_indices, EXCLUDED.held_items, EXCLUDED.location_area_encounters, EXCLUDED.stats, EXCLUDED.types` +
+		`EXCLUDED.id, EXCLUDED.name, EXCLUDED.base_experience, EXCLUDED.height, EXCLUDED.is_default, EXCLUDED.weight, EXCLUDED.ability, EXCLUDED.stats, EXCLUDED.types` +
 		`)`
 
 	// run query
-	XOLog(sqlstr, p.ID, p.Name, p.BaseExperience, p.Height, p.IsDefault, p.Weight, p.Ability, p.Forms, p.GameIndices, p.HeldItems, p.LocationAreaEncounters, p.Stats, p.Types)
-	_, err = db.Exec(sqlstr, p.ID, p.Name, p.BaseExperience, p.Height, p.IsDefault, p.Weight, p.Ability, p.Forms, p.GameIndices, p.HeldItems, p.LocationAreaEncounters, p.Stats, p.Types)
+	XOLog(sqlstr, p.ID, p.Name, p.BaseExperience, p.Height, p.IsDefault, p.Weight, p.Ability, p.Stats, p.Types)
+	_, err = db.Exec(sqlstr, p.ID, p.Name, p.BaseExperience, p.Height, p.IsDefault, p.Weight, p.Ability, p.Stats, p.Types)
 	if err != nil {
 		return err
 	}
@@ -187,7 +183,7 @@ func GetAllPokemons(db XODB) ([]*Pokemon, error) {
 		p := Pokemon{}
 
 		// scan
-		err = q.Scan(&p.ID, &p.Name, &p.BaseExperience, &p.Height, &p.IsDefault, &p.Weight, &p.Ability, &p.Forms, &p.GameIndices, &p.HeldItems, &p.LocationAreaEncounters, &p.Stats, &p.Types)
+		err = q.Scan(&p.ID, &p.Name, &p.BaseExperience, &p.Height, &p.IsDefault, &p.Weight, &p.Ability, &p.Stats, &p.Types)
 		if err != nil {
 			return nil, err
 		}
@@ -217,7 +213,7 @@ func GetChunkedPokemons(db XODB, limit int, offset int) ([]*Pokemon, error) {
 		p := Pokemon{}
 
 		// scan
-		err = q.Scan(&p.ID, &p.Name, &p.BaseExperience, &p.Height, &p.IsDefault, &p.Weight, &p.Ability, &p.Forms, &p.GameIndices, &p.HeldItems, &p.LocationAreaEncounters, &p.Stats, &p.Types)
+		err = q.Scan(&p.ID, &p.Name, &p.BaseExperience, &p.Height, &p.IsDefault, &p.Weight, &p.Ability, &p.Stats, &p.Types)
 		if err != nil {
 			return nil, err
 		}
@@ -228,6 +224,13 @@ func GetChunkedPokemons(db XODB, limit int, offset int) ([]*Pokemon, error) {
 	return res, nil
 }
 
+// Stat returns the Stat associated with the Pokemon's Stats (stats).
+//
+// Generated from foreign key 'pokemon_stats_fkey'.
+func (p *Pokemon) Stat(db XODB) (*Stat, error) {
+	return StatByID(db, p.Stats)
+}
+
 // PokemonByName retrieves a row from 'public.pokemon' as a Pokemon.
 //
 // Generated from index 'pokemon_name_key'.
@@ -236,7 +239,7 @@ func PokemonByName(db XODB, name sql.NullString) (*Pokemon, error) {
 
 	// sql query
 	const sqlstr = `SELECT ` +
-		`id, name, base_experience, height, is_default, weight, ability, forms, game_indices, held_items, location_area_encounters, stats, types ` +
+		`id, name, base_experience, height, is_default, weight, ability, stats, types ` +
 		`FROM public.pokemon ` +
 		`WHERE name = $1`
 
@@ -246,7 +249,7 @@ func PokemonByName(db XODB, name sql.NullString) (*Pokemon, error) {
 		_exists: true,
 	}
 
-	err = db.QueryRow(sqlstr, name).Scan(&p.ID, &p.Name, &p.BaseExperience, &p.Height, &p.IsDefault, &p.Weight, &p.Ability, &p.Forms, &p.GameIndices, &p.HeldItems, &p.LocationAreaEncounters, &p.Stats, &p.Types)
+	err = db.QueryRow(sqlstr, name).Scan(&p.ID, &p.Name, &p.BaseExperience, &p.Height, &p.IsDefault, &p.Weight, &p.Ability, &p.Stats, &p.Types)
 	if err != nil {
 		return nil, err
 	}
@@ -262,7 +265,7 @@ func PokemonByID(db XODB, id int) (*Pokemon, error) {
 
 	// sql query
 	const sqlstr = `SELECT ` +
-		`id, name, base_experience, height, is_default, weight, ability, forms, game_indices, held_items, location_area_encounters, stats, types ` +
+		`id, name, base_experience, height, is_default, weight, ability, stats, types ` +
 		`FROM public.pokemon ` +
 		`WHERE id = $1`
 
@@ -272,7 +275,7 @@ func PokemonByID(db XODB, id int) (*Pokemon, error) {
 		_exists: true,
 	}
 
-	err = db.QueryRow(sqlstr, id).Scan(&p.ID, &p.Name, &p.BaseExperience, &p.Height, &p.IsDefault, &p.Weight, &p.Ability, &p.Forms, &p.GameIndices, &p.HeldItems, &p.LocationAreaEncounters, &p.Stats, &p.Types)
+	err = db.QueryRow(sqlstr, id).Scan(&p.ID, &p.Name, &p.BaseExperience, &p.Height, &p.IsDefault, &p.Weight, &p.Ability, &p.Stats, &p.Types)
 	if err != nil {
 		return nil, err
 	}
