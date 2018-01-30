@@ -38,6 +38,37 @@ func (app App) SagarPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	io.WriteString(w, res)
+
+}
+
+func (app App) GetPokemon(w http.ResponseWriter, r *http.Request) {
+	tmplList := []string{"../../web/views/base.html",
+		"../../web/views/pokemon/pokemon.html"}
+
+	id, err := strconv.Atoi(bone.GetValue(r, "id"))
+
+	if err != nil {
+		app.Log.Error(err)
+	}
+
+	pokemon, err := models.FindPokemon(app.DB, id)
+
+	if err != nil {
+		app.Log.Error(err)
+	}
+
+	data := struct {
+		Pokemon      *models.PokemonMatView
+		Abilities    []string
+		PokemonTypes []string
+	}{pokemon, pokemon.GetAbilities(), pokemon.GetTypes()}
+
+	res, err := app.TplParser.ParseTemplate(tmplList, data)
+	if err != nil {
+		app.Log.Error(err)
+	}
+
+	io.WriteString(w, res)
 }
 
 func (a App) GetAllPokemon(w *framework.Response, r *framework.Request) {
@@ -45,7 +76,7 @@ func (a App) GetAllPokemon(w *framework.Response, r *framework.Request) {
 	pokemons, err := models.GetAllPokemons(a.DB)
 	if err != nil {
 		a.Log.Info(err.Error())
-		w.NotFound(errors.New("could not find the role"))
+		w.NotFound(errors.New("could not find the Pokemon"))
 		return
 	}
 	a.Log.Info(pokemons)
@@ -68,6 +99,16 @@ type PokemonList struct {
 	Results  []Result `json:results`
 }
 
+type PokemonTypeSingleAPI struct {
+	Url  string `json:"url"`
+	Name string `json:"name"`
+}
+
+type PokemonTypeAPI struct {
+	Slot        int                  `json:"slot"`
+	PokemonType PokemonTypeSingleAPI `json:"type"`
+}
+
 type StatsAPI struct {
 	Stat      Result `json:stat`
 	Effort    int64  `json:effort`
@@ -86,14 +127,26 @@ type FormAPI struct {
 }
 
 type PokemonAPI struct {
-	Form            []FormAPI    `json:"forms"`
-	Id              int          `json:id`
-	Abilities       []AbilityAPI `json:abilities`
-	Stats           []StatsAPI   `json:stats`
-	Base_experience float64      `json:base_experience`
-	Height          float64      `json:height`
-	IsDefault       bool         `json:is_default`
-	Weight          float64      `json:weight`
+	Form            []FormAPI        `json:"forms"`
+	Id              int              `json:id`
+	Abilities       []AbilityAPI     `json:abilities`
+	Stats           []StatsAPI       `json:stats`
+	Base_experience float64          `json:base_experience`
+	Types           []PokemonTypeAPI `json:"types"`
+	Height          float64          `json:height`
+	IsDefault       bool             `json:is_default`
+	Weight          float64          `json:weight`
+}
+
+func (poke PokemonAPI) GetTypes() string {
+	var returnJson string
+	for index, pokeType := range poke.Types {
+		if index != 0 {
+			returnJson += ","
+		}
+		returnJson += `"` + pokeType.PokemonType.Name + `"`
+	}
+	return "[" + returnJson + "]"
 }
 
 func (poke PokemonAPI) GetName() string {
@@ -157,6 +210,7 @@ func CreatePokemon(pokemonUrl string, app *App) {
 	pokemon.Weight = sql.NullFloat64{Float64: jsonResp.Weight, Valid: true}
 	pokemon.IsDefault = sql.NullBool{Bool: jsonResp.IsDefault, Valid: true}
 	pokemon.Ability = sql.NullString{String: jsonResp.GetAbilities(), Valid: true}
+	pokemon.Types = sql.NullString{String: jsonResp.GetTypes(), Valid: true}
 	pokemon.Stats = stats.ID
 
 	if pokemon.ID == 0 {
@@ -228,7 +282,7 @@ func (app *App) DisplayPokemons(w http.ResponseWriter, r *http.Request) {
 		"../../web/views/pokemon/pokemons.html"}
 
 	data := struct {
-		Pokemon []*models.Pokemon
+		Pokemon []*models.PokemonMatView
 	}{pokemons}
 
 	res, err := app.TplParser.ParseTemplate(tmplList, data)

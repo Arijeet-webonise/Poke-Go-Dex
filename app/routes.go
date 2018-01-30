@@ -12,6 +12,8 @@ func initialiseV1API(app *App) {
 	//VIEW
 	app.Router.Get("/", app.renderView(app.RenderIndex))
 	app.Router.Get("/sagar/:name", app.renderView(app.SagarPage))
+
 	app.Router.Get("/pokemon/generate", app.renderView(app.GenerateNewPokemon))
 	app.Router.Get("/pokemon", app.renderView(app.DisplayPokemons))
+	app.Router.Get("/pokemon/:id", app.renderView(app.GetPokemon))
 }

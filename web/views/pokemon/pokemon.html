@@ -1,0 +1,188 @@
+{{ define "content" }}
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<style>
+text.highcharts-title>tspan, h1 {
+  text-transform: capitalize;
+}
+
+.type {
+    padding: 10px;
+}
+
+.type.grass{
+  background: #78C850;
+  color: #ffffff;
+}
+
+.type.poison {
+    background: #A040A0;
+    color: #ffffff;
+}
+
+.type.fire {
+    background: #F08030;
+    color: #ffffff;
+}
+
+.type.fighting{
+  background: #C03028;
+  color: #ffffff;
+}
+
+.type.water{
+  background: #6890F0;
+  color: #ffffff;
+}
+
+.type.flying{
+  background: #A890F0;
+  color: #ffffff;
+}
+
+.type.normal{
+  background: #A8A878;
+  color: #ffffff;
+}
+
+.type.electric{
+  background: #F8D030;
+}
+
+.type.ground{
+  background: #E0C068;
+}
+
+.type.psychic{
+  background: #F85888;
+}
+
+.type.rock{
+  background: #B8A038;
+}
+
+.type.ice{
+  background: #98D8D8;
+}
+
+.type.bug{
+  background: #A8B820;
+}
+
+.type.dragon{
+  background: #7038F8;
+  color: #ffffff;
+}
+
+.type.ghost{
+  background: #705898;
+  color: #ffffff;
+}
+
+.type.dark{
+  background: #705848;
+  color: #ffffff;
+}
+
+.type.steel{
+  background: #B8B8D0;
+  color: #ffffff;
+}
+
+.type.fairy{
+  background: #EE99AC;
+  color: #ffffff;
+}
+
+#PokeImg {
+    width: 100%;
+    height: auto;
+}
+</style>
+
+  <div class="col-sm-8">
+    <div class="row">
+      <h1>{{.Pokemon.Name.String}}</h1>
+    </div>
+    <div class="row">
+      <div id="container" style="min-width: 400px; max-width: 600px; height: 400px; margin: 0 auto"></div>
+    </div>
+  </div>
+  <div class="col-sm-4">
+    <div class="well">
+      <div class="row">
+        <img id="PokeImg" class="img img-responsive" src="https://img.pokemondb.net/artwork/{{.Pokemon.Name.String}}.jpg"/>
+        </div>
+      <div class="row">
+        {{$length := len .PokemonTypes}}
+        {{range $poketype := .PokemonTypes}}
+        <div class="{{if eq $length 2}}col-sm-6{{else}}col-sm-12{{end}} type {{$poketype}}">{{$poketype}}</div>
+        {{end}}
+      </div>
+      <div class="row">
+        <div class="col-sm-6">Height: {{.Pokemon.Height.Float64}}</div>
+        <div class="col-sm-6">Weight: {{.Pokemon.Weight.Float64}}</div>
+      </div>
+      <div class="row">
+        <label>Abilities</label>
+        <ul>
+          {{range $ability := .Abilities}}
+          <li>{{$ability}}</li>
+          {{end}}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <script>
+Highcharts.chart('container', {
+
+    chart: {
+        polar: true,
+        type: 'line'
+    },
+
+    title: {
+        text: '{{.Pokemon.Name.String}} Stats',
+        x: -80
+    },
+
+    pane: {
+        size: '80%'
+    },
+
+    xAxis: {
+        categories: ['HP', 'Attack', 'Defence', 'SpAttack', 'SpDefence', 'Speed'],
+        tickmarkPlacement: 'on',
+        lineWidth: 0
+    },
+
+    yAxis: {
+        gridLineInterpolation: 'polygon',
+        lineWidth: 0,
+        min: 0
+    },
+
+    tooltip: {
+        shared: true,
+        pointFormat: '<span style="color:{series.color}">{series.name}: <b>${point.y:,.0f}</b><br/>'
+    },
+
+    legend: {
+        enabled: false,
+        align: 'right',
+        verticalAlign: 'top',
+        y: 70,
+        layout: 'vertical'
+    },
+
+    series: [{
+        name: 'Stats',
+        data: [{{.Pokemon.Hp.Int64}}, {{.Pokemon.Attack.Int64}}, {{.Pokemon.Defence.Int64}}, {{.Pokemon.SpAttack.Int64}},
+           {{.Pokemon.SpDefence.Int64}}, {{.Pokemon.Speed.Int64}}],
+        pointPlacement: 'on'
+    }]
+
+});
+  </script>
+{{end}}
