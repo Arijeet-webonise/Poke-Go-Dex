@@ -11,6 +11,34 @@ type PokemonPage struct {
 	Types       []string
 }
 
+func GetPokemonsList(db XODB, limit int, offset int) ([]*Pokemon, error) {
+	const sqlstr = `SELECT ` +
+		`*` +
+		`FROM v_pokemon`
+
+	q, err := db.Query(sqlstr)
+	if err != nil {
+		return nil, err
+	}
+	defer q.Close()
+
+	// load results
+	var res []*Pokemon
+	for q.Next() {
+		p := Pokemon{}
+
+		// scan
+		err = q.Scan(&p.ID, &p.Name, &p.BaseExperience, &p.Height, &p.IsDefault, &p.Weight, &p.Ability, &p.Stats, &p.Types)
+		if err != nil {
+			return nil, err
+		}
+
+		res = append(res, &p)
+	}
+
+	return res, nil
+}
+
 func GetPokemons(db XODB) ([]*PokemonPage, error) {
 	var data []*PokemonPage
 	pokemons, error := GetAllPokemons(db)

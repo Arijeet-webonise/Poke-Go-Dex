@@ -7,14 +7,11 @@
       <th>Type</th>
   </thead>
   <tbody>
-    {{range $i, $p := .Pokemon}}
+    {{range $p := .Pokemon}}
       <tr>
-        <td>{{$i}}</td>
-        <td>{{$p.PokemonData.Name.String}}</td>
-        <td>{{range $j, $t := $p.Types}}
-          {{if $j}},{{end}}
-          {{$t}}  
-          {{end}}</td>
+        <td>{{$p.ID}}</td>
+        <td>{{$p.Name.String}}</td>
+        <td>joi</td>
       </tr>
     {{end}}
   </tbody>

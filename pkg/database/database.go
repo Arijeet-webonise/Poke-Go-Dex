@@ -15,6 +15,6 @@ type DatabaseWrapper struct {
 
 func (dw *DatabaseWrapper) Initialise(params map[string]string) (*sql.DB, error) {
 	// need to construct this URL from the params map passed
-	u, err := dburl.Open("postgresql://local:toor@localhost/pokemon?sslmode=disable")
+	u, err := dburl.Open("postgresql://local:toor@127.0.0.1/pokemon")
 	return u, err
 }
