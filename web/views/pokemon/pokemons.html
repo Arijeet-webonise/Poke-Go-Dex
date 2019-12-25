@@ -1,0 +1,17 @@
+{{ define "content" }}
+<table class="table">
+  <thead>
+    <tr>
+      <th>S.No</th>
+      <th>Name</th>
+  </thead>
+  <tbody>
+    {{range $p := .Pokemon}}
+      <tr>
+        <td>{{$p.ID}}</td>
+        <td><a href="/pokemon/{{$p.ID}}">{{$p.Name.String}}</a></td>
+      </tr>
+    {{end}}
+  </tbody>
+</table>
+{{end}}

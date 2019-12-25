@@ -11,11 +11,22 @@ import (
 type ILogger interface {
 	Info(args ...interface{})
 	Debug(args ...interface{})
+	Error(args ...interface{})
 	Initialise()
 }
 
 type RealLogger struct {
 	log *logrus.Logger
+}
+
+func (al *RealLogger) Error(args ...interface{}) {
+	_, file, line, ok := runtime.Caller(1)
+	if ok {
+		al.log.Error(filepath.Base(file), "(", line, ") ", args)
+	} else {
+		al.log.Error(args)
+	}
+
 }
 
 func (al *RealLogger) Info(args ...interface{}) {
